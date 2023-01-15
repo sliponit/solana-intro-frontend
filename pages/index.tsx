@@ -1,5 +1,6 @@
 import type { NextPage } from 'next'
 import { useState } from 'react'
+import * as web3 from '@solana/web3.js'
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
@@ -10,8 +11,18 @@ const Home: NextPage = () => {
   const [address, setAddress] = useState('')
 
   const addressSubmittedHandler = (address: string) => {
-    setAddress(address)
-    setBalance(1000)
+    try {
+      setAddress(address)
+      const key = new web3.PublicKey(address)
+      const connection = new web3.Connection(web3.clusterApiUrl('devnet'))
+      connection.getBalance(key).then(balance => {
+        setBalance(balance / web3.LAMPORTS_PER_SOL)
+      })
+    } catch (error) {
+      setAddress('')
+      setBalance(0)
+      alert(error)
+    }
   }
 
   return (
